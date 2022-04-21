@@ -18,6 +18,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
     // since
     // until
     router.get("/repos/:owner/:repo/commits", async (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo/commits] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.getCommits(
                 request.query.sha as string,

@@ -12,6 +12,7 @@ import { handleResponse } from "../utils";
 export function create(store: nconf.Provider, repoManagerFactory: IRepositoryManagerFactory): Router {
     const router: Router = Router();
     router.post("/repos/:owner/:repo/git/blobs", async (request, response, next) => {
+        console.log(`[GitRest API][POST /repos/:owner/:repo/git/blobs] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.createBlob(
                 request.body as ICreateBlobParams,
@@ -24,6 +25,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
      * Retrieves the given blob from the repository
      */
     router.get("/repos/:owner/:repo/git/blobs/:sha", async (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo/git/blobs/:sha] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.getBlob(
                 request.params.sha,

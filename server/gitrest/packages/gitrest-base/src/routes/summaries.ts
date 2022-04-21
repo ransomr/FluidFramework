@@ -157,6 +157,7 @@ export function create(
             return;
         }
         const repoManagerParams = getRepoManagerParamsFromRequest(request);
+        console.log(`[GitRest API][GET Summaries] Starting for tenantId: ${tenantId}, documentId: ${documentId}`);
         const resultP = repoManagerFactory.open(repoManagerParams)
             .then(async (repoManager) => getSummary(
                 repoManager,
@@ -182,6 +183,7 @@ export function create(
                 response);
             return;
         }
+        console.log(`[GitRest API][POST Summaries] Starting for tenantId: ${tenantId}, documentId: ${documentId}`);
         const repoManagerParams = getRepoManagerParamsFromRequest(request);
         const wholeSummaryPayload: IWholeSummaryPayload = request.body;
         const resultP = repoManagerFactory.open(repoManagerParams)
@@ -210,6 +212,7 @@ export function create(
                 response);
             return;
         }
+        console.log(`[GitRest API][DELETE Summaries] Starting for tenantId: ${tenantId}, documentId: ${documentId}`);
         const repoManagerParams = getRepoManagerParamsFromRequest(request);
         const softDelete = request.get("Soft-Delete")?.toLowerCase() === "true";
         const resultP = repoManagerFactory.open(repoManagerParams)

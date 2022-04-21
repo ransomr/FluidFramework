@@ -13,6 +13,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
     const router: Router = Router();
 
     router.post("/repos/:owner/:repo/git/trees", async (request, response, next) => {
+        console.log(`[GitRest API][POST /repos/:owner/:repo/git/trees] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.createTree(request.body as ICreateTreeParams));
 
@@ -20,6 +21,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
     });
 
     router.get("/repos/:owner/:repo/git/trees/:sha", async (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo/git/trees/:sha] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.getTree(request.params.sha, request.query.recursive === "1"));
 

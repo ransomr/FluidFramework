@@ -15,6 +15,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
     // https://developer.github.com/v3/git/tags/
 
     router.post("/repos/:owner/:repo/git/tags", async (request, response, next) => {
+        console.log(`[GitRest API][POST /repos/:owner/:repo/git/tags] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.createTag(request.body as ICreateTagParams));
 
@@ -22,6 +23,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
     });
 
     router.get("/repos/:owner/:repo/git/tags/*", async (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo/git/tags/*] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.getTag(request.params[0]));
 

@@ -12,6 +12,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
     const router: Router = Router();
 
     router.get("/repos/:owner/:repo/contents/*", async (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo/contents/*] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.getContent(
                 request.query.ref as string,

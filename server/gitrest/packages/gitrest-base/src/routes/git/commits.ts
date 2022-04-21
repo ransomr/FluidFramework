@@ -15,6 +15,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
     // * https://developer.github.com/v3/git/commits/
 
     router.post("/repos/:owner/:repo/git/commits", async (request, response, next) => {
+        console.log(`[GitRest API][POST /repos/:owner/:repo/git/commits] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.createCommit(request.body as ICreateCommitParams));
 
@@ -22,6 +23,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
     });
 
     router.get("/repos/:owner/:repo/git/commits/:sha", async (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo/git/commits/:sha] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.getCommit(request.params.sha));
 

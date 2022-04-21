@@ -16,6 +16,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
      * Creates a new git repository
      */
     router.post("/:owner/repos", (request, response, next) => {
+        console.log(`[GitRest API][POST /:owner/repos] Starting`);
         const createParams = request.body as ICreateRepoParams;
         if (!createParams || !createParams.name) {
             return response.status(400).json("Invalid repo name");
@@ -35,6 +36,7 @@ export function create(store: nconf.Provider, repoManagerFactory: IRepositoryMan
      * Retrieves an existing get repository
      */
     router.get("/repos/:owner/:repo", (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo] Starting`);
         const repoManagerP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request));
 
         handleResponse(repoManagerP.then(() => ({ name: request.params.repo })), response);

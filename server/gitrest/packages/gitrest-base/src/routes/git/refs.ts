@@ -27,6 +27,7 @@ export function create(
     // https://developer.github.com/v3/git/refs/
 
     router.get("/repos/:owner/:repo/git/refs", async (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo/git/refs] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.getRefs());
 
@@ -34,6 +35,7 @@ export function create(
     });
 
     router.get("/repos/:owner/:repo/git/refs/*", async (request, response, next) => {
+        console.log(`[GitRest API][GET /repos/:owner/:repo/git/refs/*] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.getRef(
                 getRefId(request.params[0]),
@@ -43,6 +45,7 @@ export function create(
     });
 
     router.post("/repos/:owner/:repo/git/refs", async (request, response, next) => {
+        console.log(`[GitRest API][POST /repos/:owner/:repo/git/refs] Starting`);
         const createRefParams = request.body as ICreateRefParamsExternal;
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.createRef(
@@ -53,6 +56,7 @@ export function create(
     });
 
     router.patch("/repos/:owner/:repo/git/refs/*", async (request, response, next) => {
+        console.log(`[GitRest API][PATCH /repos/:owner/:repo/git/refs/*] Starting`);
         const patchRefParams = request.body as IPatchRefParamsExternal;
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.patchRef(
@@ -64,6 +68,7 @@ export function create(
     });
 
     router.delete("/repos/:owner/:repo/git/refs/*", async (request, response, next) => {
+        console.log(`[GitRest API][DELETE /repos/:owner/:repo/git/refs/*] Starting`);
         const resultP = repoManagerFactory.open(getRepoManagerParamsFromRequest(request))
             .then(async (repoManager) => repoManager.deleteRef(getRefId(request.params[0])));
 

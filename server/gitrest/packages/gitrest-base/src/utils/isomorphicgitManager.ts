@@ -33,6 +33,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
     }
 
     public async getCommit(sha: string): Promise<resources.ICommit> {
+        console.log(`[Isomorphic-Git] ReadCommit`);
         const commit = await isomorphicGit.readCommit({
                 fs: this.fileSystemManager,
                 gitdir: this.directory,
@@ -47,6 +48,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
         externalWriterConfig?: IExternalWriterConfig,
     ): Promise<resources.ICommitDetails[]> {
         try {
+            console.log(`[Isomorphic-Git] log`);
             const commits = await isomorphicGit.log({
                 fs: this.fileSystemManager,
                 gitdir: this.directory,
@@ -79,6 +81,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
     }
 
     private async getTreeInternal(sha: string): Promise<resources.ITree> {
+        console.log(`[Isomorphic-Git] readTree`);
         const readTreeResult = await isomorphicGit.readTree({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -113,7 +116,9 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
                 };
             }
         };
+        console.log(`[Isomorphic-Git] TREE`);
         const root = isomorphicGit.TREE({ ref: sha });
+        console.log(`[Isomorphic-Git] walk`);
         const results = await isomorphicGit.walk({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -144,6 +149,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
     }
 
     public async getBlob(sha: string): Promise<resources.IBlob> {
+        console.log(`[Isomorphic-Git] readBlob`);
         const blob = await isomorphicGit.readBlob({
                 fs: this.fileSystemManager,
                 gitdir: this.directory,
@@ -153,6 +159,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
     }
 
     public async getContent(commit: string, contentPath: string): Promise<resources.IBlob> {
+        console.log(`[Isomorphic-Git] readBlob`);
         const blob = await isomorphicGit.readBlob({
                 fs: this.fileSystemManager,
                 gitdir: this.directory,
@@ -167,6 +174,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
             !helpers.validateBlobEncoding(createBlobParams.encoding)) {
             throw new NetworkError(400, "Invalid blob");
         }
+        console.log(`[Isomorphic-Git] writeBlob`);
         const blobOid = await isomorphicGit.writeBlob({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -187,6 +195,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
             isoGitTreeObject.push(conversions.iCreateTreeEntryToTreeEntry(node));
         }
 
+        console.log(`[Isomorphic-Git] writeTree`);
         const id = await isomorphicGit.writeTree({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -197,6 +206,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
 
     public async createCommit(commit: resources.ICreateCommitParams): Promise<resources.ICommit> {
         const commitObject = conversions.iCreateCommitParamsToCommitObject(commit);
+        console.log(`[Isomorphic-Git] writeCommit`);
         const commitOid = await isomorphicGit.writeCommit({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -219,6 +229,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
 
     public async getRefs(): Promise<resources.IRef[]> {
         const refIds: string[] = [];
+        console.log(`[Isomorphic-Git] listBranches and listTags`);
         const [branches, tags] = await Promise.all([
             isomorphicGit.listBranches({
                 fs: this.fileSystemManager,
@@ -232,6 +243,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
 
         refIds.push(...branches, ...tags);
 
+        console.log(`[Isomorphic-Git] resolveRef and expandRef`);
         const resolvedAndExpandedRefs = await Promise.all(
             refIds.map(
                 async (refId) => {
@@ -262,6 +274,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
 
     public async getRef(refId: string, externalWriterConfig?: IExternalWriterConfig): Promise<resources.IRef> {
         try {
+            console.log(`[Isomorphic-Git] resolveRef and expandRef`);
             const [resolvedRef, expandedRef] = await Promise.all([
                 isomorphicGit.resolveRef({
                     fs: this.fileSystemManager,
@@ -285,6 +298,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
         createRefParams: resources.ICreateRefParams,
         externalWriterConfig?: IExternalWriterConfig,
     ): Promise<resources.IRef> {
+        console.log(`[Isomorphic-Git] writeRef`);
         await isomorphicGit.writeRef({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -299,6 +313,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
         patchRefParams: resources.IPatchRefParams,
         externalWriterConfig?: IExternalWriterConfig,
     ): Promise<resources.IRef> {
+        console.log(`[Isomorphic-Git] writeRef`);
         await isomorphicGit.writeRef({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -311,6 +326,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
 
     public async deleteRef(refId: string): Promise<void> {
         try {
+            console.log(`[Isomorphic-Git] deleteRef`);
             await isomorphicGit.deleteRef({
                 fs: this.fileSystemManager,
                 gitdir: this.directory,
@@ -322,6 +338,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
     }
 
     public async getTag(tagId: string): Promise<resources.ITag> {
+        console.log(`[Isomorphic-Git] readTag`);
         const readTagResult = await isomorphicGit.readTag({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -332,6 +349,7 @@ export class IsomorphicGitRepositoryManager implements IRepositoryManager {
 
     public async createTag(tagParams: resources.ICreateTagParams): Promise<resources.ITag> {
         const tagObject = conversions.iCreateTagParamsToTagObject(tagParams);
+        console.log(`[Isomorphic-Git] writeTag`);
         const tagOid = await isomorphicGit.writeTag({
             fs: this.fileSystemManager,
             gitdir: this.directory,
@@ -358,7 +376,7 @@ export class IsomorphicGitManagerFactory implements IRepositoryManagerFactory {
         const directoryPath = helpers.getGitDirectory(
             repoPath,
             this.storageDirectoryConfig.baseDir);
-
+        console.log(`[Isomorphic-Git] Creating repo, calling Init: ${directoryPath}`);
         // Create and then cache the repository
         await isomorphicGit.init({
             fs: fileSystemManager,
