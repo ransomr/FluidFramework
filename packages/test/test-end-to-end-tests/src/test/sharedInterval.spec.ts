@@ -461,6 +461,47 @@ describeFullCompat("SharedInterval", (getTestObjectProvider) => {
             }
         });
 
+        it.only("Conflicting create", async () => {
+            const stringId = "stringKey";
+            const registry: ChannelFactoryRegistry = [[stringId, SharedString.getFactory()]];
+            const testContainerConfig: ITestContainerConfig = {
+                fluidDataObjectType: DataObjectFactoryType.Test,
+                registry,
+            };
+
+            // Create a Container for the first client.
+            const container1 = await provider.makeTestContainer(testContainerConfig);
+            const dataObject1 = await requestFluidObject<ITestFluidObject>(container1, "default");
+            const sharedString1 = await dataObject1.getSharedObject<SharedString>(stringId);
+
+            sharedString1.insertText(0, "01234");
+
+            await provider.ensureSynchronized();
+
+            // Load the Container that was created by the first client.
+            const container2 = await provider.loadTestContainer(testContainerConfig);
+            const dataObject2 = await requestFluidObject<ITestFluidObject>(container2, "default");
+            const sharedString2 = await dataObject2.getSharedObject<SharedString>(stringId);
+
+            // Conflicting Create
+            const intervals1 = sharedString1.getIntervalCollection("intervals");
+            const interval1 = intervals1.add(0, 0, IntervalType.SlideOnRemove);
+            const id1 = interval1.getIntervalId();
+            assert(id1);
+
+            const intervals2 = sharedString2.getIntervalCollection("intervals");
+            const interval2 = intervals2.add(0, 0, IntervalType.SlideOnRemove);
+            const id2 = interval2.getIntervalId();
+            assert(id2);
+
+            await provider.ensureSynchronized();
+
+            assert.notStrictEqual(intervals1.getIntervalById(id2), undefined, "Interval not added to collection 1");
+            assert.notStrictEqual(intervals1.getIntervalById(id2), interval1, "Unique interval not added");
+            assert.notStrictEqual(intervals2.getIntervalById(id1), undefined, "Interval not added to collection 2");
+            assert.notStrictEqual(intervals2.getIntervalById(id1), interval2, "Unique interval not added");
+        });
+
         it("Conflicting ops", async () => {
             const stringId = "stringKey";
             const registry: ChannelFactoryRegistry = [[stringId, SharedString.getFactory()]];
