@@ -461,7 +461,7 @@ describeFullCompat("SharedInterval", (getTestObjectProvider) => {
             }
         });
 
-        it.only("Conflicting create", async () => {
+        it.only("Conflicting create interval collection", async () => {
             const stringId = "stringKey";
             const registry: ChannelFactoryRegistry = [[stringId, SharedString.getFactory()]];
             const testContainerConfig: ITestContainerConfig = {
@@ -496,10 +496,17 @@ describeFullCompat("SharedInterval", (getTestObjectProvider) => {
 
             await provider.ensureSynchronized();
 
+            const currentIntervals1 = sharedString1.getIntervalCollection("intervals");
+            assert.strictEqual(intervals1, currentIntervals1, "Intervals object not maintained");
             assert.notStrictEqual(intervals1.getIntervalById(id2), undefined, "Interval not added to collection 1");
             assert.notStrictEqual(intervals1.getIntervalById(id2), interval1, "Unique interval not added");
-            assert.notStrictEqual(intervals2.getIntervalById(id1), undefined, "Interval not added to collection 2");
+            assert.strictEqual(intervals1.getIntervalById(id1), interval1, "Interval object not maintained");
+
+            const currentIntervals2 = sharedString2.getIntervalCollection("intervals");
+            assert.strictEqual(intervals2, currentIntervals2, "Intervals object not maintained");
+            assert.notStrictEqual(intervals2.getIntervalById(id1), undefined, "Interval not added to collection 1");
             assert.notStrictEqual(intervals2.getIntervalById(id1), interval2, "Unique interval not added");
+            assert.strictEqual(intervals2.getIntervalById(id2), interval2, "Interval object not maintained");
         });
 
         it("Conflicting ops", async () => {

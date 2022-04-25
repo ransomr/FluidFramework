@@ -739,6 +739,12 @@ export class MapKernel implements IValueTypeCreator {
                         return;
                     }
 
+                    if (op.value.type !== ValueType[ValueType.Plain] && op.value.type !== ValueType[ValueType.Shared]
+                        && this.data.has(op.key)) {
+                        // ValueType that already exists in the map. The ValueType must handle merging the types.
+                        return;
+                    }
+
                     // needProcessKeyOperation should have returned false if local is true
                     const context = this.makeLocal(op.key, op.value);
                     this.setCore(op.key, context, local, message);
