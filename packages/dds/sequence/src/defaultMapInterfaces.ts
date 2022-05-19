@@ -33,7 +33,7 @@ export interface IValueOpEmitter {
      * @param params - JSONable params for the operation as defined by the value type
      * @alpha
      */
-    emit(opName: string, previousValue: any, params: any): void;
+    emit(opName: string, previousValue: any, params: any, localOpMetadata: any): void;
 }
 
 /**
@@ -72,13 +72,15 @@ export interface IValueOperation<T> {
      * @param params - The params on the incoming operation
      * @param local - Whether the operation originated from this client
      * @param message - The operation itself
+     * @param localOpMetadata - The local metadata associated with the operation
      * @alpha
      */
     process(
         value: T,
         params: any,
         local: boolean,
-        message: ISequencedDocumentMessage | undefined
+        message: ISequencedDocumentMessage | undefined,
+        localOpMetadata: any
     );
 }
 

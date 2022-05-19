@@ -260,7 +260,7 @@ export interface ISharedString extends SharedSegmentSequence<SharedStringSegment
 // @public
 export interface IValueOpEmitter {
     // @alpha
-    emit(opName: string, previousValue: any, params: any): void;
+    emit(opName: string, previousValue: any, params: any, localOpMetadata: any): void;
 }
 
 // @public @deprecated (undocumented)

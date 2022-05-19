@@ -711,24 +711,24 @@ export class SequenceIntervalCollectionValueType
             [[
                 "add",
                 {
-                    process: (value, params, local, op) => {
-                        value.ackAdd(params, local, op);
+                    process: (value, params, local, op, localOpMetadata) => {
+                        value.ackAdd(params, local, op, localOpMetadata);
                     },
                 },
             ],
             [
                 "delete",
                 {
-                    process: (value, params, local, op) => {
-                        value.ackDelete(params, local, op);
+                    process: (value, params, local, op, localOpMetadata) => {
+                        value.ackDelete(params, local, op, localOpMetadata);
                     },
                 },
             ],
             [
                 "change",
                 {
-                    process: (value, params, local, op) => {
-                        value.ackChange(params, local, op);
+                    process: (value, params, local, op, localOpMetadata) => {
+                        value.ackChange(params, local, op, localOpMetadata);
                     },
                 },
             ]]);
@@ -940,7 +940,7 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
                 start,
             };
             // Local ops get submitted to the server. Remote ops have the deserializer run.
-            this.emitter.emit("add", undefined, serializedInterval);
+            this.emitter.emit("add", undefined, serializedInterval, interval);
         }
 
         this.emit("addInterval", interval, true, undefined);
@@ -954,7 +954,7 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
         if (interval) {
             // Local ops get submitted to the server. Remote ops have the deserializer run.
             if (local) {
-                this.emitter.emit("delete", undefined, interval.serialize(this.client));
+                this.emitter.emit("delete", undefined, interval.serialize(this.client), undefined);
             } else {
                 if (this.onDeserialize) {
                     this.onDeserialize(interval);
@@ -994,7 +994,7 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
             serializedInterval.end = undefined;
             serializedInterval.properties = props;
             serializedInterval.properties[reservedIntervalIdKey] = interval.getIntervalId();
-            this.emitter.emit("change", undefined, serializedInterval);
+            this.emitter.emit("change", undefined, serializedInterval, undefined);
             this.emit("propertyChanged", interval, deltaProps);
         }
         this.emit("changeInterval", interval, true, undefined);
@@ -1020,7 +1020,7 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
                 {
                     [reservedIntervalIdKey]: interval.getIntervalId(),
                 };
-            this.emitter.emit("change", undefined, serializedInterval);
+            this.emitter.emit("change", undefined, serializedInterval, interval);
             this.addPendingChange(id, serializedInterval);
         }
         this.emit("changeInterval", interval, true, undefined);
@@ -1095,12 +1095,22 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
     }
 
     /** @deprecated - use ackChange */
-    public changeInterval(serializedInterval: ISerializedInterval, local: boolean, op: ISequencedDocumentMessage) {
-        return this.ackChange(serializedInterval, local, op);
+    public changeInterval(
+        serializedInterval: ISerializedInterval,
+        local: boolean,
+        op: ISequencedDocumentMessage,
+        localOpMetadata: TInterval | undefined,
+    ) {
+        return this.ackChange(serializedInterval, local, op, localOpMetadata);
     }
 
     /** @internal */
-    public ackChange(serializedInterval: ISerializedInterval, local: boolean, op: ISequencedDocumentMessage) {
+    public ackChange(
+        serializedInterval: ISerializedInterval,
+        local: boolean,
+        op: ISequencedDocumentMessage,
+        localOpMetadata: TInterval | undefined,
+    ) {
         if (!this.attached) {
             throw new Error("Attach must be called before accessing intervals");
         }
@@ -1108,6 +1118,9 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
         let interval: TInterval | undefined;
 
         if (local) {
+            if (localOpMetadata) {
+                //
+            }
             // This is an ack from the server. Remove the pending change.
             this.removePendingChange(serializedInterval);
             const id: string = serializedInterval.properties[reservedIntervalIdKey];
@@ -1188,19 +1201,22 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
     public addInternal(
         serializedInterval: ISerializedInterval,
         local: boolean,
-        op: ISequencedDocumentMessage) {
-        return this.ackAdd(serializedInterval, local, op);
+        op: ISequencedDocumentMessage,
+        localOpMetadata: TInterval) {
+        return this.ackAdd(serializedInterval, local, op, localOpMetadata);
     }
 
     /** @internal */
     public ackAdd(
         serializedInterval: ISerializedInterval,
         local: boolean,
-        op: ISequencedDocumentMessage) {
+        op: ISequencedDocumentMessage,
+        localOpMetadata: TInterval) {
         if (local) {
-            assert(this.pendingReferences.count() >= 2, "Pending reference not saved");
-            this.ackReference(this.pendingReferences.dequeue());
-            this.ackReference(this.pendingReferences.dequeue());
+            // TODO: Rethink the abstraction and interfaces here to avoid the instanceof check
+            assert(localOpMetadata instanceof SequenceInterval, "interval must be SequenceInterval");
+            this.ackReference(localOpMetadata.start);
+            this.ackReference(localOpMetadata.end);
             return;
         }
 
@@ -1240,7 +1256,8 @@ export class IntervalCollection<TInterval extends ISerializableInterval>
     public ackDelete(
         serializedInterval: ISerializedInterval,
         local: boolean,
-        op: ISequencedDocumentMessage): void {
+        op: ISequencedDocumentMessage,
+        localOpMetadata: undefined): void {
         if (local) {
             // Local ops were applied when the message was created and there's no "pending delete"
             // state to bookkeep: remote operation application takes into account possibility of
